@@ -1,0 +1,21 @@
+{
+  "name": "meine-stimme",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace frontend",
+    "build": "npm run build --workspace frontend"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0",
+    "formidable": "^3.5.4",
+    "resend": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/formidable": "^3.5.1",
+    "@vercel/node": "^5.8.22",
+    "typescript": "^6.0.3"
+  }
+}
