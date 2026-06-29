@@ -16,8 +16,7 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 ## Frontend (Bewohner-Ansicht)
 - [x] Routing für alle 6 Screens (`/:facilitySlug` → Start/Problem/Lösung/Name/Bestätigen/Fertig)
 - [x] Klick-Dummy für alle 6 Screens, Production-Build getestet
-- [x] `lib/facility.ts` (Kiosk-URL-als-Identität) geschrieben
-- [ ] `lib/facility.ts` ist noch nicht in den Screens verdrahtet — diese nutzen aktuell React-Routers `useParams()` statt der geplanten URL-Quelle
+- [x] `lib/facility.ts` (Kiosk-URL-als-Identität) geschrieben und über `useFacilitySlug()` in allen 6 Screens verdrahtet (statt `useParams()`)
 - [ ] `useReadAloud` (Vorlesen der Fragen)
 - [ ] `useRecorder` (echte Audioaufnahme via MediaRecorder)
 - [ ] `useTranscription` (Whisper im Browser) + Web-Speech-Fallback-Entscheidung
@@ -61,6 +60,5 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 
 ## Nächste konkrete Schritte
 1. `COMPLAINT_RECIPIENT_EMAIL` festlegen und in `.env` ergänzen.
-2. Migration in Supabase ausführen, ersten Staff-Account anlegen.
-3. `lib/facility.ts` in die Screens verdrahten (statt `useParams()`).
-4. `useRecorder`/`useReadAloud` bauen — höchstes technisches Risiko, siehe Plan Abschnitt 3.
+2. Migration in Supabase ausführen, ersten Staff-Account anlegen (manueller Schritt, kein DB-Zugriff von hier aus möglich).
+3. `useRecorder`/`useReadAloud` bauen — höchstes technisches Risiko, siehe Plan Abschnitt 3.
