@@ -1,10 +1,11 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BigButton } from '../components/BigButton';
 import { ProgressDots } from '../components/ProgressDots';
+import { useFacilitySlug } from '../lib/facility';
 
 export function ConfirmScreen() {
   const navigate = useNavigate();
-  const { facilitySlug } = useParams();
+  const facilitySlug = useFacilitySlug();
 
   const handleSend = () => {
     // POST an /api/complaints kommt in Tag 3 (siehe Umsetzungsplan Abschnitt 4)

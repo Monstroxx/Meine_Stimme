@@ -1,10 +1,11 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BigButton } from '../components/BigButton';
 import { ProgressDots } from '../components/ProgressDots';
+import { useFacilitySlug } from '../lib/facility';
 
 export function ProblemScreen() {
   const navigate = useNavigate();
-  const { facilitySlug } = useParams();
+  const facilitySlug = useFacilitySlug();
 
   return (
     <div className="flex min-h-svh flex-col justify-between p-6">

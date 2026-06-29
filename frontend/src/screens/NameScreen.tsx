@@ -1,11 +1,12 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BigButton } from '../components/BigButton';
 import { ProgressDots } from '../components/ProgressDots';
 import { useComplaintStore } from '../state/complaintStore';
+import { useFacilitySlug } from '../lib/facility';
 
 export function NameScreen() {
   const navigate = useNavigate();
-  const { facilitySlug } = useParams();
+  const facilitySlug = useFacilitySlug();
   const setAnonymous = useComplaintStore((s) => s.setAnonymous);
 
   const choose = (anonymous: boolean) => {

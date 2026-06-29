@@ -1,3 +1,5 @@
+import { useParams } from 'react-router-dom';
+
 const STORAGE_KEY = 'meine-stimme:facility-slug';
 
 /**
@@ -15,4 +17,14 @@ export function getFacilitySlug(pathname: string = window.location.pathname): st
   }
 
   return window.localStorage.getItem(STORAGE_KEY);
+}
+
+/**
+ * React-Router liefert den Slug aus dem URL-Match, kann ihn aber nicht aus localStorage
+ * nachladen. getFacilitySlug() ist daher die massgebliche Quelle; useParams() dient hier
+ * nur als Hinweis, dass sich die Route geaendert hat, damit der Hook bei Navigation neu liest.
+ */
+export function useFacilitySlug(): string | null {
+  const { facilitySlug: paramSlug } = useParams();
+  return getFacilitySlug() ?? paramSlug ?? null;
 }
