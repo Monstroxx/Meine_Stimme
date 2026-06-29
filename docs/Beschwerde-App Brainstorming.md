@@ -69,7 +69,7 @@ Funktionen ohne Login (Bewertungsbogen verlangt ≥ 3): Spracheingabe · Vorlese
 | Vorlesen | Web Speech API (`SpeechSynthesis`) | Liest Fragen vor, wie Mebis |
 | Backend | Node.js \+ Express oder Serverless | Nimmt Beschwerde \+ Audio an, speichert, mailt; kennt zentralen Empfänger |
 | Datenbank \+ Login | Supabase (PostgreSQL), Region Frankfurt | Auth, Verschlüsselung, Row-Level-Security, EU-Hosting |
-| E-Mail-Versand | Brevo oder Resend (EU) | DSGVO-freundlicher Versand inkl. Anhang |
+| E-Mail-Versand | Resend (EU) | DSGVO-freundlicher Versand inkl. Anhang |
 | Hosting | Vercel (Frontend) \+ Supabase | Einfaches Deployment |
 | Optionale KI | LLM (Claude/GPT) zur Auto-Kategorisierung | Tagt Kategorie \+ Dringlichkeit — **nur taggen, nicht bündeln** |
 
