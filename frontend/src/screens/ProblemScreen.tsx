@@ -1,9 +1,13 @@
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { BigButton } from '../components/BigButton';
-import { ProgressDots } from '../components/ProgressDots';
+import { KioskFrame } from '../components/KioskFrame';
+import { ReadAloudButton } from '../components/ReadAloudButton';
 import { RecordControls } from '../components/RecordControls';
 import { useFacilitySlug } from '../lib/facility';
 import { useComplaintStore } from '../state/complaintStore';
+
+const QUESTION = 'Was ist los? Erzähl, was dich stört.';
 
 export function ProblemScreen() {
   const navigate = useNavigate();
@@ -11,20 +15,22 @@ export function ProblemScreen() {
   const { problemBlob, setProblemBlob } = useComplaintStore();
 
   return (
-    <div className="flex min-h-svh flex-col justify-between p-6">
-      <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Was ist los?</h2>
-        <RecordControls
-          question="Was ist los? Beschreibe dein Problem."
-          onBlob={setProblemBlob}
-        />
-        {problemBlob && (
-          <BigButton onClick={() => navigate(`/${facilitySlug}/loesung`)} className="max-w-md">
+    <KioskFrame
+      onHome={() => navigate(`/${facilitySlug}`)}
+      footer={
+        problemBlob ? (
+          <BigButton icon={<ArrowRight size={28} strokeWidth={3} />} onClick={() => navigate(`/${facilitySlug}/loesung`)}>
             Weiter
           </BigButton>
-        )}
+        ) : null
+      }
+      dots={{ step: 0, total: 4 }}
+    >
+      <div className="flex flex-col items-center gap-4">
+        <ReadAloudButton text={QUESTION} autoPlay halo />
+        <h2 className="text-4xl font-extrabold text-gray-900">Was ist los?</h2>
       </div>
-      <ProgressDots step={0} total={4} />
-    </div>
+      <RecordControls onBlob={setProblemBlob} />
+    </KioskFrame>
   );
 }

@@ -1,72 +1,61 @@
 import { useEffect } from 'react';
-import { BigButton } from './BigButton';
-import { useReadAloud } from '../hooks/useReadAloud';
+import { Play, RotateCcw } from 'lucide-react';
+import { MicButton } from './MicButton';
 import { useRecorder } from '../hooks/useRecorder';
 
 interface RecordControlsProps {
-  question: string;
   onBlob: (blob: Blob) => void;
+  size?: 'lg' | 'md';
   /** Wird in Tag 3 mit useTranscription befuellt */
   onTranscript?: (text: string) => void;
 }
 
-export function RecordControls({ question, onBlob }: RecordControlsProps) {
-  const { speak, cancel } = useReadAloud();
+/** Mikrofon-Aufnahme nach docs/ui_konzept: grosser roter Knopf + Anhören/Neu-aufnehmen. */
+export function RecordControls({ onBlob, size = 'md' }: RecordControlsProps) {
   const { state, audioBlob, audioUrl, error, startRecording, stopRecording, reset } = useRecorder();
-
-  useEffect(() => {
-    speak(question);
-    return () => cancel();
-  }, [question, speak, cancel]);
 
   // Blob an Parent weiterreichen sobald Aufnahme fertig ist.
   useEffect(() => {
     if (audioBlob) onBlob(audioBlob);
   }, [audioBlob, onBlob]);
 
+  const handleMicClick = () => {
+    if (state === 'idle') startRecording();
+    else if (state === 'recording') stopRecording();
+    else reset();
+  };
+
+  const playback = () => {
+    if (audioUrl) new Audio(audioUrl).play();
+  };
+
   return (
-    <div className="flex w-full max-w-md flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-6">
       {error && (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        <p className="rounded-2xl bg-red-50 px-4 py-3 text-base font-semibold text-red-700">{error}</p>
       )}
 
-      {state === 'idle' && (
-        <BigButton onClick={startRecording} className="w-full bg-red-500 text-white hover:bg-red-600">
-          🎤 Aufnehmen
-        </BigButton>
-      )}
+      <MicButton state={state} onClick={handleMicClick} size={size} />
 
       {state === 'recording' && (
-        <BigButton onClick={stopRecording} className="w-full animate-pulse bg-red-600 text-white">
-          ⏹ Stopp
-        </BigButton>
+        <p className="text-lg font-bold text-brand-mic">Ich höre zu …</p>
       )}
 
-      {state === 'done' && audioUrl && (
-        <div className="flex w-full flex-col gap-3">
-          <audio src={audioUrl} controls className="w-full rounded-xl" />
-          <div className="flex gap-3">
-            <BigButton variant="ghost" onClick={reset} className="flex-1">
-              🔄 Neu aufnehmen
-            </BigButton>
-            <BigButton
-              variant="ghost"
-              onClick={() => speak(question)}
-              className="flex-1"
-            >
-              🔊 Frage wiederholen
-            </BigButton>
-          </div>
+      {state === 'done' && (
+        <div className="flex gap-3">
+          <button
+            onClick={playback}
+            className="flex items-center gap-2 rounded-2xl bg-[#fbe7c6] px-5 py-3 text-lg font-bold text-[#9a5a00] active:brightness-95"
+          >
+            <Play size={22} fill="currentColor" strokeWidth={0} /> Anhören
+          </button>
+          <button
+            onClick={reset}
+            className="flex items-center gap-2 rounded-2xl border-2 border-gray-200 bg-white px-5 py-3 text-lg font-bold text-gray-600 active:bg-gray-50"
+          >
+            <RotateCcw size={22} strokeWidth={2.5} /> Neu
+          </button>
         </div>
-      )}
-
-      {state !== 'recording' && (
-        <button
-          onClick={() => speak(question)}
-          className="text-sm text-gray-500 underline underline-offset-2"
-        >
-          🔊 Frage nochmal vorlesen
-        </button>
       )}
     </div>
   );

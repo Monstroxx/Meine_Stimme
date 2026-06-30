@@ -1,16 +1,42 @@
 @import "tailwindcss";
 
+/* Markenfarben aus docs/ui_konzept: roter Mic-Knopf, blaue Primary-Aktion,
+   gruenes Senden, oranger Vorlese-Button. Als Theme-Tokens, damit bg-brand-* nutzbar ist. */
+@theme {
+  --color-brand-mic: #d92332;
+  --color-brand-mic-ring: #fbdadd;
+  --color-brand-blue: #1b62d6;
+  --color-brand-blue-dark: #154fad;
+  --color-brand-green: #2a8a44;
+  --color-brand-green-dark: #226e37;
+  --color-brand-amber: #f39a0e;
+  --color-brand-amber-ring: #fde6bf;
+  --font-display: 'Nunito', system-ui, 'Segoe UI', sans-serif;
+}
+
 :root {
   color-scheme: light;
 }
 
+html,
 body {
   margin: 0;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  background: #ffffff;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Mebis-Vorbild: alle interaktiven Elemente mindestens 48px hoch antippbar */
+/* Barrierefreiheit (Mebis-Vorbild): alle interaktiven Elemente gut antippbar */
 button,
 a[role='button'] {
   min-height: 48px;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-mic-pulse {
+  animation: mic-pulse 1.2s ease-in-out infinite;
 }

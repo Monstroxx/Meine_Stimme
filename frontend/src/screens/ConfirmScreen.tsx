@@ -1,11 +1,19 @@
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Check, Play } from 'lucide-react';
 import { BigButton } from '../components/BigButton';
-import { ProgressDots } from '../components/ProgressDots';
+import { KioskFrame } from '../components/KioskFrame';
+import { ReadAloudButton } from '../components/ReadAloudButton';
 import { useFacilitySlug } from '../lib/facility';
+import { useComplaintStore } from '../state/complaintStore';
 
 export function ConfirmScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
+  const { problemBlob } = useComplaintStore();
+
+  const playRecording = () => {
+    if (problemBlob) new Audio(URL.createObjectURL(problemBlob)).play();
+  };
 
   const handleSend = () => {
     // POST an /api/complaints kommt in Tag 3 (siehe Umsetzungsplan Abschnitt 4)
@@ -13,20 +21,25 @@ export function ConfirmScreen() {
   };
 
   return (
-    <div className="flex min-h-svh flex-col justify-between p-6">
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Abschicken?</h2>
-        <div className="flex w-full max-w-md flex-col gap-3">
-          <BigButton variant="ghost">▶ Anhören</BigButton>
-          <BigButton variant="secondary" onClick={handleSend}>
-            ✔ Senden
+    <KioskFrame
+      onHome={() => navigate(`/${facilitySlug}`)}
+      topRight={<ReadAloudButton text="Möchtest du deine Beschwerde abschicken?" autoPlay />}
+      footer={
+        <>
+          <BigButton variant="amber" icon={<Play size={26} fill="currentColor" strokeWidth={0} />} onClick={playRecording}>
+            Anhören
           </BigButton>
-          <BigButton variant="ghost" onClick={() => navigate(`/${facilitySlug}/name`)}>
-            ← Zurück
+          <BigButton variant="success" icon={<Check size={28} strokeWidth={3} />} onClick={handleSend}>
+            Senden
           </BigButton>
-        </div>
-      </div>
-      <ProgressDots step={3} total={4} />
-    </div>
+          <BigButton variant="ghost" icon={<ArrowLeft size={26} strokeWidth={3} />} onClick={() => navigate(`/${facilitySlug}/name`)}>
+            Zurück
+          </BigButton>
+        </>
+      }
+      dots={{ step: 3, total: 4 }}
+    >
+      <h2 className="text-4xl font-extrabold text-gray-900">Abschicken?</h2>
+    </KioskFrame>
   );
 }

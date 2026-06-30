@@ -1,32 +1,49 @@
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight, ChevronsRight } from 'lucide-react';
 import { BigButton } from '../components/BigButton';
-import { ProgressDots } from '../components/ProgressDots';
+import { KioskFrame } from '../components/KioskFrame';
+import { ReadAloudButton } from '../components/ReadAloudButton';
 import { RecordControls } from '../components/RecordControls';
 import { useFacilitySlug } from '../lib/facility';
 import { useComplaintStore } from '../state/complaintStore';
 
+const QUESTION = 'Hast du eine Idee, wie es besser werden könnte?';
+
 export function SolutionScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
-  const { solutionBlob, setSolutionBlob } = useComplaintStore();
+  const setSolutionBlob = useComplaintStore((s) => s.setSolutionBlob);
   const goNext = () => navigate(`/${facilitySlug}/name`);
 
   return (
-    <div className="flex min-h-svh flex-col justify-between p-6">
-      <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Hast du eine Idee?</h2>
-        <RecordControls
-          question="Hast du eine Idee, wie das besser werden könnte?"
-          onBlob={setSolutionBlob}
-        />
-        <div className="flex w-full max-w-md gap-3">
-          <BigButton variant="ghost" onClick={goNext}>
-            Überspringen
+    <KioskFrame
+      onHome={() => navigate(`/${facilitySlug}`)}
+      footer={
+        <div className="flex w-full gap-4">
+          <BigButton
+            variant="ghost"
+            onClick={goNext}
+            aria-label="Überspringen"
+            className="!w-24 flex-none"
+          >
+            <ChevronsRight size={28} strokeWidth={3} />
           </BigButton>
-          {solutionBlob && <BigButton onClick={goNext}>Weiter</BigButton>}
+          <BigButton
+            icon={<ArrowRight size={28} strokeWidth={3} />}
+            onClick={goNext}
+            className="!w-auto flex-1"
+          >
+            Weiter
+          </BigButton>
         </div>
+      }
+      dots={{ step: 1, total: 4 }}
+    >
+      <div className="flex flex-col items-center gap-4">
+        <ReadAloudButton text={QUESTION} autoPlay halo />
+        <h2 className="text-4xl font-extrabold text-gray-900">Deine Idee?</h2>
       </div>
-      <ProgressDots step={1} total={4} />
-    </div>
+      <RecordControls onBlob={setSolutionBlob} />
+    </KioskFrame>
   );
 }

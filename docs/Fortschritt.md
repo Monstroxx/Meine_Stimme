@@ -21,10 +21,10 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 - [x] `useRecorder` (echte Audioaufnahme via MediaRecorder, webm/opus)
 - [x] `RecordControls`-Komponente (Aufnehmen/Stopp/Anhören/Neu), in Problem-/Lösung-/NameScreen eingebaut
 - [x] Anonymitäts-Hinweis in `NameScreen.tsx` sichtbar ("Stimme kann erkennbar sein", Ethik-Anforderung)
+- [x] UI nach `docs/ui_konzept/` umgesetzt: echte Icons (lucide-react), Nunito-Font, Marken-Farben, großer Mic-Knopf, KioskFrame-Layout, kontrastreiche große Buttons
 - [ ] `useTranscription` (Whisper im Browser) + Web-Speech-Fallback-Entscheidung
 - [ ] `ConfirmScreen` an `/api/complaints` anbinden (sendet aktuell nichts)
-- [ ] Anonymitäts-Hinweis in `NameScreen.tsx` (Ethik-Anforderung aus dem Brainstorming)
-- [ ] Barrierefreiheits-Pass (Touch-Targets, Contrast, Screenreader)
+- [ ] Barrierefreiheits-Pass auf echtem Tablet (Touch-Targets, Contrast, Screenreader)
 
 ## Backend (`api/`)
 - [x] `api/complaints.ts` (POST, Multipart-Parsing, Audio-Upload, DB-Insert, Mail-Versand) — typgeprüft, **ungetestet gegen echte Supabase/Resend-Accounts**
