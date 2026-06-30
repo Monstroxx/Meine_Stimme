@@ -12,13 +12,13 @@ const QUESTION = 'Was ist los? Erzähl, was dich stört.';
 export function ProblemScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
-  const { problemBlob, setProblemBlob, setProblemText } = useComplaintStore();
+  const { problemBlob, problemText, setProblemBlob, setProblemText } = useComplaintStore();
 
   return (
     <KioskFrame
       onHome={() => navigate(`/${facilitySlug}`)}
       footer={
-        problemBlob ? (
+        problemBlob || problemText.trim() ? (
           <BigButton icon={<ArrowRight size={28} strokeWidth={3} />} onClick={() => navigate(`/${facilitySlug}/loesung`)}>
             Weiter
           </BigButton>

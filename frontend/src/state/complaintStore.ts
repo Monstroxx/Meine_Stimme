@@ -9,9 +9,9 @@ interface ComplaintState {
   solutionText: string;
   nameText: string;
   setAnonymous: (value: boolean) => void;
-  setProblemBlob: (blob: Blob) => void;
-  setSolutionBlob: (blob: Blob) => void;
-  setNameBlob: (blob: Blob) => void;
+  setProblemBlob: (blob: Blob | null) => void;
+  setSolutionBlob: (blob: Blob | null) => void;
+  setNameBlob: (blob: Blob | null) => void;
   setProblemText: (text: string) => void;
   setSolutionText: (text: string) => void;
   setNameText: (text: string) => void;

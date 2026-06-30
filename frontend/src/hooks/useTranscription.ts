@@ -12,7 +12,9 @@ function getTranscriber(): Promise<unknown> {
       const { pipeline, env } = await import('@xenova/transformers');
       // Im Browser kein lokales Modell-Verzeichnis – immer vom HF-Hub laden und cachen.
       env.allowLocalModels = false;
-      return pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny');
+      // whisper-base statt -tiny: spuerbar bessere deutsche Erkennung, laeuft im Browser
+      // noch fluessig und wird nach dem ersten Download im IndexedDB gecacht.
+      return pipeline('automatic-speech-recognition', 'Xenova/whisper-base');
     })();
   }
   return transcriberPromise;
