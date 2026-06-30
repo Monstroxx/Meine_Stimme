@@ -62,7 +62,7 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 - [ ] `npm audit`-Befund (3 high, 1 critical, transitiv über `@xenova/transformers`) bewusst akzeptiert und begründet dokumentiert
 
 ## Doku & Präsentation
-- [ ] Kurzdokumentation (4-6 Seiten) geschrieben
+- [x] Kurzdokumentation (`docs/Kurzdokumentation.md`) geschrieben — alle Pflichtinhalte des Bewertungsbogens abgedeckt
 - [ ] Präsentation (15-20 Min) erstellt
 - [ ] Retrospektive geschrieben
 - [ ] Logbuch geführt
