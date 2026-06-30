@@ -47,10 +47,11 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 
 ## Admin-/Verwaltungs-Ansicht
 - [x] Platzhalter-Routing (`AdminApp`, `LoginScreen`, `ComplaintList`, `ComplaintDetail`)
-- [ ] Supabase-Auth-Login funktionsfähig
-- [ ] `ComplaintList` gegen echte Daten (RLS-gefiltert nach Einrichtung)
-- [ ] `ComplaintDetail` mit Status-Änderung + Audio-Wiedergabe über `/api/audio-url`
-- [ ] Sichtbare Anonym-Sperre im UI (deaktivierter Audio-Button mit Hinweis "Nur für Leitung")
+- [x] Supabase-Auth-Login funktionsfähig (`signInWithPassword`, Session-Guard in `AdminApp`)
+- [x] `ComplaintList` gegen echte Daten (RLS-gefiltert nach Einrichtung) + Status-Filter
+- [x] `ComplaintDetail` mit Status-Änderung (PATCH) + Audio-Wiedergabe über `/api/audio-url`
+- [x] Sichtbare Anonym-Sperre im UI (gesperrter Audio-Button mit Hinweis "Nur für Leitung")
+- [ ] Admin-Flow auf echtem Login getestet (E2E: anmelden → Liste → Status ändern → Audio)
 
 ## Sicherheit / Bewertungsbogen
 - [x] RLS-Policies (anon insert-only, authenticated facility-scoped)
