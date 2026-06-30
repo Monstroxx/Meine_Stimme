@@ -6,6 +6,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace frontend",
+    "dev:api": "tsx watch scripts/dev-api.ts",
     "build": "npm run build --workspace frontend"
   },
   "dependencies": {
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/formidable": "^3.5.1",
     "@vercel/node": "^5.8.22",
+    "dotenv": "^17.4.2",
     "typescript": "^6.0.3"
   }
 }

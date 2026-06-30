@@ -96,8 +96,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (solutionAudio) attachments.push({ filename: 'loesung.webm', content: solutionAudio.buffer });
     if (nameAudio) attachments.push({ filename: 'name.webm', content: nameAudio.buffer });
 
+    // Ohne eigene verifizierte Domain nutzt der Prototyp den Resend-Sandbox-Sender
+    // (sendet nur an die Account-Adresse). Spaeter via RESEND_FROM auf eigene Domain umstellen.
     await resend.emails.send({
-      from: 'Meine Stimme <beschwerde@meine-stimme.app>',
+      from: process.env.RESEND_FROM ?? 'Meine Stimme <onboarding@resend.dev>',
       to: recipient,
       subject: `Neue Beschwerde — ${getFacilityName(facilitySlug)}`,
       text: [

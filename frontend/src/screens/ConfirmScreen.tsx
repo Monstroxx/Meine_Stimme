@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, Play } from 'lucide-react';
 import { BigButton } from '../components/BigButton';
@@ -5,6 +6,7 @@ import { KioskFrame } from '../components/KioskFrame';
 import { ReadAloudButton } from '../components/ReadAloudButton';
 import { useFacilitySlug } from '../lib/facility';
 import { useComplaintStore } from '../state/complaintStore';
+import { submitComplaint } from '../lib/submitComplaint';
 
 /** Spielt mehrere Audio-Blobs nacheinander ab (Problem → Idee → Name). */
 async function playSequentially(blobs: Blob[]) {
@@ -23,16 +25,38 @@ async function playSequentially(blobs: Blob[]) {
 export function ConfirmScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
-  const { problemBlob, solutionBlob, nameBlob, problemText, solutionText } = useComplaintStore();
+  const { problemBlob, solutionBlob, nameBlob, problemText, solutionText, nameText, isAnonymous } =
+    useComplaintStore();
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const playAll = () => {
     const blobs = [problemBlob, solutionBlob, nameBlob].filter((b): b is Blob => b !== null);
     if (blobs.length > 0) void playSequentially(blobs);
   };
 
-  const handleSend = () => {
-    // POST an /api/complaints kommt in Tag 3 (siehe Umsetzungsplan Abschnitt 4)
-    navigate(`/${facilitySlug}/fertig`);
+  const handleSend = async () => {
+    if (!facilitySlug) return;
+    setSending(true);
+    setError(null);
+    try {
+      await submitComplaint({
+        facilitySlug,
+        isAnonymous,
+        problemBlob,
+        solutionBlob,
+        nameBlob,
+        problemText,
+        solutionText,
+        nameText,
+      });
+      navigate(`/${facilitySlug}/fertig`);
+    } catch (err) {
+      // Aufnahme bleibt im Store erhalten – Nutzer kann erneut senden (z. B. nach WLAN-Aussetzer).
+      setError(err instanceof Error ? err.message : 'Senden fehlgeschlagen');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -41,13 +65,33 @@ export function ConfirmScreen() {
       topRight={<ReadAloudButton text="Möchtest du deine Beschwerde abschicken?" autoPlay />}
       footer={
         <>
-          <BigButton variant="amber" icon={<Play size={26} fill="currentColor" strokeWidth={0} />} onClick={playAll}>
+          {error && (
+            <p className="rounded-2xl bg-red-50 px-5 py-4 text-center text-lg font-semibold text-red-700">
+              {error}
+            </p>
+          )}
+          <BigButton
+            variant="amber"
+            icon={<Play size={26} fill="currentColor" strokeWidth={0} />}
+            onClick={playAll}
+            disabled={sending}
+          >
             Anhören
           </BigButton>
-          <BigButton variant="success" icon={<Check size={28} strokeWidth={3} />} onClick={handleSend}>
-            Senden
+          <BigButton
+            variant="success"
+            icon={<Check size={28} strokeWidth={3} />}
+            onClick={handleSend}
+            disabled={sending}
+          >
+            {sending ? 'Wird gesendet …' : 'Senden'}
           </BigButton>
-          <BigButton variant="ghost" icon={<ArrowLeft size={26} strokeWidth={3} />} onClick={() => navigate(`/${facilitySlug}/name`)}>
+          <BigButton
+            variant="ghost"
+            icon={<ArrowLeft size={26} strokeWidth={3} />}
+            onClick={() => navigate(`/${facilitySlug}/name`)}
+            disabled={sending}
+          >
             Zurück
           </BigButton>
         </>

@@ -26,15 +26,17 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 - [x] `ConfirmScreen` „Anhören" spielt alle Audios nacheinander ab (Problem → Idee → Name)
 - [x] Anonym-Warnung entfernt (verwirrte Nutzer); „Anonym" geht direkt weiter
 - [ ] **Entscheidungspunkt**: Whisper-Ladezeit/Genauigkeit auf echtem Tablet testen — ggf. Web-Speech-Fallback oder whisper-base
-- [ ] `ConfirmScreen` an `/api/complaints` anbinden (sendet aktuell nichts)
+- [x] `ConfirmScreen` an `/api/complaints` angebunden (multipart-Upload, Lade-/Fehlerzustand, Aufnahme bleibt bei Fehler erhalten)
 - [ ] Barrierefreiheits-Pass auf echtem Tablet (Touch-Targets, Contrast, Screenreader)
 
 ## Backend (`api/`)
-- [x] `api/complaints.ts` (POST, Multipart-Parsing, Audio-Upload, DB-Insert, Mail-Versand) — typgeprüft, **ungetestet gegen echte Supabase/Resend-Accounts**
+- [x] `api/complaints.ts` (POST, Multipart-Parsing, Audio-Upload, DB-Insert, Mail-Versand) — **gegen echte Supabase/Resend getestet** (Text-Beschwerde: 200, DB-Zeile + Mail OK)
 - [x] `api/complaints/[id].ts` (PATCH Status, Auth- + Facility-Scope-Prüfung)
 - [x] `api/audio-url.ts` (signierte URL, Anonymitäts-Sperre für Audio)
 - [x] `_lib/supabaseAdmin.ts`, `_lib/resend.ts`, `_lib/facilityConfig.ts`
-- [ ] Echter End-to-End-Test: Beschwerde absenden → Mail mit Anhang kommt an → Zeile in `complaints` sichtbar
+- [x] Lokaler API-Dev-Server (`scripts/dev-api.ts`, `npm run dev:api`) für Test ohne Vercel
+- [x] Resend-Absender auf Sandbox `onboarding@resend.dev` umgestellt (eigene Domain via `RESEND_FROM`)
+- [ ] Voller Audio-End-to-End-Test über die UI (Aufnahme → Mail mit Audio-Anhang) auf echtem Gerät
 - [ ] `facilityConfig.ts` mit den echten Einrichtungs-Slugs/Namen befüllen (aktuell nur Platzhalter `wohnform-01/-02/-03`)
 
 ## Datenbank (Supabase)
