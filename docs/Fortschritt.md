@@ -22,7 +22,10 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 - [x] `RecordControls`-Komponente (Aufnehmen/Stopp/Anhören/Neu), in Problem-/Lösung-/NameScreen eingebaut
 - [x] Anonymitäts-Hinweis in `NameScreen.tsx` sichtbar ("Stimme kann erkennbar sein", Ethik-Anforderung)
 - [x] UI nach `docs/ui_konzept/` umgesetzt: echte Icons (lucide-react), Nunito-Font, Marken-Farben, großer Mic-Knopf, KioskFrame-Layout, kontrastreiche große Buttons
-- [ ] `useTranscription` (Whisper im Browser) + Web-Speech-Fallback-Entscheidung
+- [x] `useTranscription` (Whisper-tiny via Transformers.js, lazy geladen) — erkannter Text wird unter der Aufnahme und als Zusammenfassung auf dem Bestätigen-Screen angezeigt
+- [x] `ConfirmScreen` „Anhören" spielt alle Audios nacheinander ab (Problem → Idee → Name)
+- [x] Anonym-Warnung entfernt (verwirrte Nutzer); „Anonym" geht direkt weiter
+- [ ] **Entscheidungspunkt**: Whisper-Ladezeit/Genauigkeit auf echtem Tablet testen — ggf. Web-Speech-Fallback oder whisper-base
 - [ ] `ConfirmScreen` an `/api/complaints` anbinden (sendet aktuell nichts)
 - [ ] Barrierefreiheits-Pass auf echtem Tablet (Touch-Targets, Contrast, Screenreader)
 

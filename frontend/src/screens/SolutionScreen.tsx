@@ -13,6 +13,7 @@ export function SolutionScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
   const setSolutionBlob = useComplaintStore((s) => s.setSolutionBlob);
+  const setSolutionText = useComplaintStore((s) => s.setSolutionText);
   const goNext = () => navigate(`/${facilitySlug}/name`);
 
   return (
@@ -43,7 +44,7 @@ export function SolutionScreen() {
         <ReadAloudButton text={QUESTION} autoPlay halo />
         <h2 className="text-4xl font-extrabold text-gray-900">Deine Idee?</h2>
       </div>
-      <RecordControls onBlob={setSolutionBlob} />
+      <RecordControls onBlob={setSolutionBlob} onTranscript={setSolutionText} />
     </KioskFrame>
   );
 }
