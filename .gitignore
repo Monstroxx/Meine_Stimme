@@ -236,3 +236,5 @@ $RECYCLE.BIN/
 .vercel
 supabase/.branches
 supabase/.temp
+
+.mcp.json
