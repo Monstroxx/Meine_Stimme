@@ -101,7 +101,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Das Resend-SDK wirft bei API-Fehlern nicht, sondern liefert { error } – daher explizit pruefen,
     // sonst meldet die Funktion faelschlich 200, obwohl keine Mail rausging.
     const { data: mail, error: mailError } = await resend.emails.send({
-      from: process.env.RESEND_FROM ?? 'Meine Stimme <onboarding@resend.dev>',
+      from: process.env.RESEND_FROM || 'Meine Stimme <onboarding@resend.dev>',
       to: recipient,
       subject: `Neue Beschwerde — ${getFacilityName(facilitySlug)}`,
       text: [
