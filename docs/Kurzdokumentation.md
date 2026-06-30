@@ -2,6 +2,8 @@
 
 **HIT12 · Praktikumsersatzleistung „AWE mit KI" · Projektwoche 29.06.–03.07.2026**
 
+**Team:** Monstroxx · TagerTi
+
 Eine barrierefreie, sprachbasierte Beschwerde-App für Menschen mit geistiger
 Behinderung in Besonderen Wohnformen.
 
