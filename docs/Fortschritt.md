@@ -17,8 +17,10 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 - [x] Routing für alle 6 Screens (`/:facilitySlug` → Start/Problem/Lösung/Name/Bestätigen/Fertig)
 - [x] Klick-Dummy für alle 6 Screens, Production-Build getestet
 - [x] `lib/facility.ts` (Kiosk-URL-als-Identität) geschrieben und über `useFacilitySlug()` in allen 6 Screens verdrahtet (statt `useParams()`)
-- [ ] `useReadAloud` (Vorlesen der Fragen)
-- [ ] `useRecorder` (echte Audioaufnahme via MediaRecorder)
+- [x] `useReadAloud` (Vorlesen der Fragen per SpeechSynthesis, de-DE)
+- [x] `useRecorder` (echte Audioaufnahme via MediaRecorder, webm/opus)
+- [x] `RecordControls`-Komponente (Aufnehmen/Stopp/Anhören/Neu), in Problem-/Lösung-/NameScreen eingebaut
+- [x] Anonymitäts-Hinweis in `NameScreen.tsx` sichtbar ("Stimme kann erkennbar sein", Ethik-Anforderung)
 - [ ] `useTranscription` (Whisper im Browser) + Web-Speech-Fallback-Entscheidung
 - [ ] `ConfirmScreen` an `/api/complaints` anbinden (sendet aktuell nichts)
 - [ ] Anonymitäts-Hinweis in `NameScreen.tsx` (Ethik-Anforderung aus dem Brainstorming)
@@ -34,8 +36,8 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 
 ## Datenbank (Supabase)
 - [x] `supabase/migrations/0001_init.sql` (Tabellen `complaints`/`staff`, RLS-Policies, privater Storage-Bucket)
-- [ ] Migration im Supabase SQL-Editor tatsächlich ausgeführt
-- [ ] Mindestens ein Auth-Nutzer + zugehörige `staff`-Zeile manuell angelegt (Admin-Demo-Login)
+- [x] Migration via Supabase-MCP ausgeführt (Tabellen + RLS aktiv, Bucket `complaint-audio` angelegt)
+- [x] Admin-Account `jonas.boos@mailbox.org` (Rolle: `leitung`) + `staff`-Zeile via SQL angelegt
 
 ## Admin-/Verwaltungs-Ansicht
 - [x] Platzhalter-Routing (`AdminApp`, `LoginScreen`, `ComplaintList`, `ComplaintDetail`)
@@ -59,6 +61,6 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 - [ ] Logbuch geführt
 
 ## Nächste konkrete Schritte
-1. `COMPLAINT_RECIPIENT_EMAIL` festlegen und in `.env` ergänzen.
-2. Migration in Supabase ausführen, ersten Staff-Account anlegen (manueller Schritt, kein DB-Zugriff von hier aus möglich).
-3. `useRecorder`/`useReadAloud` bauen — höchstes technisches Risiko, siehe Plan Abschnitt 3.
+1. `useReadAloud` (Vorlesen der Fragen per SpeechSynthesis) bauen.
+2. `useRecorder` (echte Audioaufnahme via MediaRecorder) bauen — höchstes technisches Risiko.
+3. `useTranscription` (Whisper im Browser) + Entscheidung Web-Speech-Fallback End-of-Tag-2.
