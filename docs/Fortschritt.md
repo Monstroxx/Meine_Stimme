@@ -10,7 +10,7 @@ Stand: 29.06.2026 (Tag 1 von 5). Siehe `plan.md` für den vollständigen Umsetzu
 - [x] `.env.example` mit den tatsächlichen Key-Namen
 - [ ] Supabase-Projekt wirklich angelegt/verifiziert (Region Frankfurt) — Keys liegen in `.env`, Projekt-Status nicht geprüft
 - [ ] Resend-Account + Sende-Domain verifiziert (aktuell Platzhalter-Absender `beschwerde@meine-stimme.app`)
-- [ ] Vercel-Projekt importiert + Env-Vars dort gesetzt
+- [x] Vercel-Projekt verbunden (GitHub-Auto-Deploy auf `main`), Env-Vars gesetzt, Deployment Protection aus — Live + API/DB-Pfad in Produktion getestet
 - [ ] `COMPLAINT_RECIPIENT_EMAIL` festgelegt (zentrale Empfangsadresse für Beschwerden)
 
 ## Frontend (Bewohner-Ansicht)
