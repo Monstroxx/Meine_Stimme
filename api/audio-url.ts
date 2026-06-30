@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabaseAdmin } from './_lib/supabaseAdmin';
+import { supabaseAdmin } from './_lib/supabaseAdmin.js';
 
 const BUCKET = 'complaint-audio';
 const SIGNED_URL_TTL_SECONDS = 60;

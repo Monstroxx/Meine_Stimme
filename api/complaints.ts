@@ -2,9 +2,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import formidable, { type File } from 'formidable';
-import { supabaseAdmin } from './_lib/supabaseAdmin';
-import { resend } from './_lib/resend';
-import { getFacilityName, isValidFacilitySlug } from './_lib/facilityConfig';
+import { supabaseAdmin } from './_lib/supabaseAdmin.js';
+import { resend } from './_lib/resend.js';
+import { getFacilityName, isValidFacilitySlug } from './_lib/facilityConfig.js';
 
 // Vercel soll den Body nicht selbst parsen, da multipart/form-data (Audio-Anhaenge) durchkommt.
 export const config = {
