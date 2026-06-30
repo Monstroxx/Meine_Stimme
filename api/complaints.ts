@@ -98,7 +98,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Ohne eigene verifizierte Domain nutzt der Prototyp den Resend-Sandbox-Sender
     // (sendet nur an die Account-Adresse). Spaeter via RESEND_FROM auf eigene Domain umstellen.
-    await resend.emails.send({
+    // Das Resend-SDK wirft bei API-Fehlern nicht, sondern liefert { error } – daher explizit pruefen,
+    // sonst meldet die Funktion faelschlich 200, obwohl keine Mail rausging.
+    const { data: mail, error: mailError } = await resend.emails.send({
       from: process.env.RESEND_FROM ?? 'Meine Stimme <onboarding@resend.dev>',
       to: recipient,
       subject: `Neue Beschwerde — ${getFacilityName(facilitySlug)}`,
@@ -114,6 +116,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ].join('\n'),
       attachments,
     });
+
+    if (mailError) {
+      throw new Error(`Mail-Versand fehlgeschlagen: ${JSON.stringify(mailError)}`);
+    }
+    console.log('Mail an %s gesendet, Resend-ID: %s', recipient, mail?.id);
 
     res.status(200).json({ ok: true, id: complaintId });
   } catch (err) {
