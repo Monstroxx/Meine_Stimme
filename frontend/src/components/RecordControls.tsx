@@ -2,75 +2,64 @@ import { useEffect, useState } from 'react';
 import { Keyboard, Mic, Play, RotateCcw } from 'lucide-react';
 import { MicButton } from './MicButton';
 import { useRecorder } from '../hooks/useRecorder';
-import { useTranscription } from '../hooks/useTranscription';
+import { stopCurrentPlayback } from '../lib/audioPlayback';
+import { useComplaintStore, type Field } from '../state/complaintStore';
 
 interface RecordControlsProps {
-  onBlob: (blob: Blob | null) => void;
-  onTranscript?: (text: string) => void;
+  field: Field;
   size?: 'lg' | 'md';
   placeholder?: string;
 }
 
 /**
  * Eingabe nach docs/ui_konzept: roter Mic-Knopf mit Anhören/Neu und erkanntem Text.
- * Der erkannte Text ist editierbar (Whisper ist nicht perfekt), und per Tastatur-Symbol
- * kann komplett getippt statt gesprochen werden – wichtig z. B. fuer Namen.
+ * Die Transkription läuft im Hintergrund (Store) weiter, auch wenn der Nutzer schon
+ * weiterklickt. Der erkannte Text ist editierbar; per Tastatur-Symbol kann komplett
+ * getippt statt gesprochen werden (wichtig z. B. für Namen). Beim Start der Aufnahme
+ * wird eine noch laufende Ansage gestoppt (sauberer Record).
  */
-export function RecordControls({
-  onBlob,
-  onTranscript,
-  size = 'md',
-  placeholder = 'Hier tippen …',
-}: RecordControlsProps) {
+export function RecordControls({ field, size = 'md', placeholder = 'Hier tippen …' }: RecordControlsProps) {
   const { state, audioBlob, audioUrl, error, startRecording, stopRecording, reset } = useRecorder();
-  const { status: transStatus, transcribe } = useTranscription();
+  const recordField = useComplaintStore((s) => s.recordField);
+  const setFieldText = useComplaintStore((s) => s.setFieldText);
+  const clearField = useComplaintStore((s) => s.clearField);
+  const status = useComplaintStore((s) => s[`${field}Status`]);
+  const text = useComplaintStore((s) => s[`${field}Text`]);
   const [mode, setMode] = useState<'voice' | 'type'>('voice');
-  const [text, setText] = useState('');
 
-  // Aufnahme fertig: Blob hochreichen und transkribieren.
+  // Aufnahme fertig: Blob in den Store legen und Transkription im Hintergrund starten.
   useEffect(() => {
-    if (!audioBlob) return;
-    onBlob(audioBlob);
-
-    let cancelled = false;
-    transcribe(audioBlob).then((t) => {
-      if (cancelled || !t) return;
-      setText(t);
-      onTranscript?.(t);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [audioBlob, onBlob, onTranscript, transcribe]);
-
-  const updateText = (value: string) => {
-    setText(value);
-    onTranscript?.(value);
-  };
+    if (audioBlob) recordField(field, audioBlob);
+  }, [audioBlob, field, recordField]);
 
   const handleMicClick = () => {
-    if (state === 'idle') startRecording();
-    else if (state === 'recording') stopRecording();
+    if (state === 'idle') {
+      stopCurrentPlayback(); // laufende Ansage stoppen, bevor aufgenommen wird
+      startRecording();
+    } else if (state === 'recording') {
+      stopRecording();
+    }
   };
 
   const startOver = () => {
-    updateText('');
-    onBlob(null);
+    clearField(field);
     reset();
   };
 
   const switchToType = () => {
-    // Aufnahme verwerfen, damit kein abgebrochenes Audio mitgeschickt wird.
-    onBlob(null);
+    clearField(field); // Aufnahme verwerfen, damit kein abgebrochenes Audio mitgeschickt wird
     reset();
     setMode('type');
   };
 
   const playback = () => {
-    if (audioUrl) new Audio(audioUrl).play();
+    if (audioUrl) {
+      stopCurrentPlayback();
+      new Audio(audioUrl).play();
+    }
   };
 
-  const transcribing = transStatus === 'loading' || transStatus === 'transcribing';
+  const transcribing = status === 'pending';
 
   // ── Tastatur-Modus ────────────────────────────────────────────────
   if (mode === 'type') {
@@ -79,7 +68,7 @@ export function RecordControls({
         <textarea
           autoFocus
           value={text}
-          onChange={(e) => updateText(e.target.value)}
+          onChange={(e) => setFieldText(field, e.target.value)}
           placeholder={placeholder}
           rows={3}
           className="w-full rounded-2xl border-2 border-brand-blue/40 bg-white px-5 py-4 text-xl font-semibold leading-snug text-gray-800 outline-none focus:border-brand-blue"
@@ -131,24 +120,22 @@ export function RecordControls({
             </button>
           </div>
 
-          {transcribing ? (
-            <p className="text-base font-semibold text-gray-400">Text wird erkannt …</p>
-          ) : (
-            <div className="w-full">
-              <p className="mb-2 text-left text-sm font-bold text-gray-400">
-                {transStatus === 'error'
+          <div className="w-full">
+            <p className="mb-2 text-left text-sm font-bold text-gray-400">
+              {transcribing
+                ? 'Text wird erkannt … (du kannst weiter)'
+                : status === 'error'
                   ? 'Konnte nicht erkannt werden – bitte tippen:'
                   : 'Erkannt – du kannst es verbessern:'}
-              </p>
-              <textarea
-                value={text}
-                onChange={(e) => updateText(e.target.value)}
-                placeholder={placeholder}
-                rows={3}
-                className="w-full rounded-2xl border-2 border-gray-200 bg-gray-50 px-5 py-4 text-lg font-semibold leading-snug text-gray-800 outline-none focus:border-brand-blue focus:bg-white"
-              />
-            </div>
-          )}
+            </p>
+            <textarea
+              value={text}
+              onChange={(e) => setFieldText(field, e.target.value)}
+              placeholder={transcribing ? 'wird erkannt …' : placeholder}
+              rows={3}
+              className="w-full rounded-2xl border-2 border-gray-200 bg-gray-50 px-5 py-4 text-lg font-semibold leading-snug text-gray-800 outline-none focus:border-brand-blue focus:bg-white"
+            />
+          </div>
         </>
       )}
     </div>

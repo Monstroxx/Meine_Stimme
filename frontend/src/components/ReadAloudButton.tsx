@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Volume2 } from 'lucide-react';
 import { useReadAloud } from '../hooks/useReadAloud';
+import { registerPlayback } from '../lib/audioPlayback';
 
 interface ReadAloudButtonProps {
   text: string;
@@ -37,6 +38,7 @@ export function ReadAloudButton({ text, audioSrc, autoPlay = false, halo = false
     if (audioSrc) {
       const el = audioRef.current;
       if (!el) return;
+      registerPlayback(el); // als aktuelle Ansage merken, damit der Record sie stoppen kann
       el.currentTime = 0; // bei erneutem Tippen von vorne abspielen
       // Autoplay kann bis zur ersten Nutzer-Interaktion vom Browser blockiert werden.
       void el.play().catch(() => {});

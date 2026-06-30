@@ -13,7 +13,7 @@ const QUESTION = 'Was ist los? Erzähl, was dich stört.';
 export function ProblemScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
-  const { problemBlob, problemText, setProblemBlob, setProblemText } = useComplaintStore();
+  const { problemBlob, problemText } = useComplaintStore();
 
   return (
     <KioskFrame
@@ -31,7 +31,7 @@ export function ProblemScreen() {
         <ReadAloudButton text={QUESTION} audioSrc={VOICELINES.problem} autoPlay halo />
         <h2 className="text-4xl font-extrabold text-gray-900">Was ist los?</h2>
       </div>
-      <RecordControls onBlob={setProblemBlob} onTranscript={setProblemText} />
+      <RecordControls field="problem" />
     </KioskFrame>
   );
 }

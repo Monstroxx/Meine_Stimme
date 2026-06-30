@@ -14,12 +14,13 @@ const QUESTION = 'Wie heißt du? Du kannst auch anonym bleiben.';
 export function NameScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
-  const { nameBlob, nameText, setAnonymous, setNameBlob, setNameText } = useComplaintStore();
+  const { nameBlob, nameText, setAnonymous, clearField } = useComplaintStore();
   const [recording, setRecording] = useState(false);
 
   const goNext = () => navigate(`/${facilitySlug}/bestaetigen`);
 
   const chooseAnonymous = () => {
+    clearField('name'); // evtl. aufgenommenen Namen verwerfen
     setAnonymous(true);
     goNext();
   };
@@ -59,7 +60,7 @@ export function NameScreen() {
 
       {recording && (
         <div className="flex w-full flex-col items-center gap-4">
-          <RecordControls onBlob={setNameBlob} onTranscript={setNameText} placeholder="Name eingeben …" />
+          <RecordControls field="name" placeholder="Name eingeben …" />
           <button onClick={() => setRecording(false)} className="text-lg font-bold text-gray-500 underline">
             Zurück
           </button>

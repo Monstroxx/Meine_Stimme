@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Play } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, Play } from 'lucide-react';
 import { BigButton } from '../components/BigButton';
 import { KioskFrame } from '../components/KioskFrame';
 import { ReadAloudButton } from '../components/ReadAloudButton';
 import { VOICELINES } from '../lib/voicelines';
+import { stopCurrentPlayback } from '../lib/audioPlayback';
 import { useFacilitySlug } from '../lib/facility';
-import { useComplaintStore } from '../state/complaintStore';
+import { useComplaintStore, type TranscriptionStatus } from '../state/complaintStore';
 import { submitComplaint } from '../lib/submitComplaint';
 
 /** Spielt mehrere Audio-Blobs nacheinander ab (Problem → Idee → Name). */
@@ -23,42 +24,95 @@ async function playSequentially(blobs: Blob[]) {
   }
 }
 
+type Phase = 'idle' | 'waiting' | 'sending';
+
+/** Zusammenfassungs-Karte je Feld: zeigt erkannten Text oder "wird noch erkannt …". */
+function FieldCard({
+  label,
+  status,
+  text,
+  hasAudio,
+}: {
+  label: string;
+  status: TranscriptionStatus;
+  text: string;
+  hasAudio: boolean;
+}) {
+  if (!text && !hasAudio) return null;
+  return (
+    <div className="rounded-2xl bg-gray-50 px-5 py-4">
+      <p className="text-sm font-bold uppercase tracking-wide text-gray-400">{label}</p>
+      {status === 'pending' ? (
+        <p className="flex items-center gap-2 text-lg font-semibold text-gray-500">
+          <Loader2 size={18} className="animate-spin" /> wird noch erkannt …
+        </p>
+      ) : text ? (
+        <p className="text-lg font-semibold leading-snug text-gray-800">„{text}"</p>
+      ) : (
+        <p className="text-lg font-semibold text-gray-500">(per Audio aufgenommen)</p>
+      )}
+    </div>
+  );
+}
+
 export function ConfirmScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
-  const { problemBlob, solutionBlob, nameBlob, problemText, solutionText, nameText, isAnonymous } =
-    useComplaintStore();
-  const [sending, setSending] = useState(false);
+  const {
+    problemBlob,
+    solutionBlob,
+    nameBlob,
+    problemText,
+    solutionText,
+    problemStatus,
+    solutionStatus,
+    awaitTranscriptions,
+  } = useComplaintStore();
+  const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState<string | null>(null);
+  const sending = phase !== 'idle';
 
   const playAll = () => {
+    stopCurrentPlayback();
     const blobs = [problemBlob, solutionBlob, nameBlob].filter((b): b is Blob => b !== null);
     if (blobs.length > 0) void playSequentially(blobs);
   };
 
   const handleSend = async () => {
-    if (!facilitySlug) return;
-    setSending(true);
+    if (!facilitySlug || sending) return;
     setError(null);
     try {
+      // Falls noch erkannt wird: erst warten, bis alle Texte da sind, dann senden.
+      const st = useComplaintStore.getState();
+      const stillPending =
+        st.problemStatus === 'pending' || st.solutionStatus === 'pending' || st.nameStatus === 'pending';
+      if (stillPending) {
+        setPhase('waiting');
+        await awaitTranscriptions();
+      }
+      setPhase('sending');
+      // Frische Werte aus dem Store (Transkription kann gerade erst fertig geworden sein).
+      const s = useComplaintStore.getState();
       await submitComplaint({
         facilitySlug,
-        isAnonymous,
-        problemBlob,
-        solutionBlob,
-        nameBlob,
-        problemText,
-        solutionText,
-        nameText,
+        isAnonymous: s.isAnonymous,
+        problemBlob: s.problemBlob,
+        solutionBlob: s.solutionBlob,
+        nameBlob: s.nameBlob,
+        problemText: s.problemText,
+        solutionText: s.solutionText,
+        nameText: s.nameText,
       });
       navigate(`/${facilitySlug}/fertig`);
     } catch (err) {
       // Aufnahme bleibt im Store erhalten – Nutzer kann erneut senden (z. B. nach WLAN-Aussetzer).
       setError(err instanceof Error ? err.message : 'Senden fehlgeschlagen');
-    } finally {
-      setSending(false);
+      setPhase('idle');
     }
   };
+
+  const sendLabel =
+    phase === 'waiting' ? 'Warte auf Texterkennung …' : phase === 'sending' ? 'Wird gesendet …' : 'Senden';
 
   return (
     <KioskFrame
@@ -85,7 +139,7 @@ export function ConfirmScreen() {
             onClick={handleSend}
             disabled={sending}
           >
-            {sending ? 'Wird gesendet …' : 'Senden'}
+            {sendLabel}
           </BigButton>
           <BigButton
             variant="ghost"
@@ -101,22 +155,10 @@ export function ConfirmScreen() {
     >
       <h2 className="text-4xl font-extrabold text-gray-900">Abschicken?</h2>
 
-      {(problemText || solutionText) && (
-        <div className="flex w-full flex-col gap-3 text-left">
-          {problemText && (
-            <div className="rounded-2xl bg-gray-50 px-5 py-4">
-              <p className="text-sm font-bold uppercase tracking-wide text-gray-400">Problem</p>
-              <p className="text-lg font-semibold leading-snug text-gray-800">„{problemText}"</p>
-            </div>
-          )}
-          {solutionText && (
-            <div className="rounded-2xl bg-gray-50 px-5 py-4">
-              <p className="text-sm font-bold uppercase tracking-wide text-gray-400">Idee</p>
-              <p className="text-lg font-semibold leading-snug text-gray-800">„{solutionText}"</p>
-            </div>
-          )}
-        </div>
-      )}
+      <div className="flex w-full flex-col gap-3 text-left">
+        <FieldCard label="Problem" status={problemStatus} text={problemText} hasAudio={!!problemBlob} />
+        <FieldCard label="Idee" status={solutionStatus} text={solutionText} hasAudio={!!solutionBlob} />
+      </div>
     </KioskFrame>
   );
 }

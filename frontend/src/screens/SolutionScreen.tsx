@@ -6,15 +6,12 @@ import { ReadAloudButton } from '../components/ReadAloudButton';
 import { VOICELINES } from '../lib/voicelines';
 import { RecordControls } from '../components/RecordControls';
 import { useFacilitySlug } from '../lib/facility';
-import { useComplaintStore } from '../state/complaintStore';
 
 const QUESTION = 'Hast du eine Idee, wie es besser werden könnte?';
 
 export function SolutionScreen() {
   const navigate = useNavigate();
   const facilitySlug = useFacilitySlug();
-  const setSolutionBlob = useComplaintStore((s) => s.setSolutionBlob);
-  const setSolutionText = useComplaintStore((s) => s.setSolutionText);
   const goNext = () => navigate(`/${facilitySlug}/name`);
 
   return (
@@ -45,7 +42,7 @@ export function SolutionScreen() {
         <ReadAloudButton text={QUESTION} audioSrc={VOICELINES.solution} autoPlay halo />
         <h2 className="text-4xl font-extrabold text-gray-900">Deine Idee?</h2>
       </div>
-      <RecordControls onBlob={setSolutionBlob} onTranscript={setSolutionText} />
+      <RecordControls field="solution" />
     </KioskFrame>
   );
 }
