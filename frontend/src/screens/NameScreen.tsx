@@ -4,6 +4,7 @@ import { ArrowRight, Glasses, User } from 'lucide-react';
 import { BigButton } from '../components/BigButton';
 import { KioskFrame } from '../components/KioskFrame';
 import { ReadAloudButton } from '../components/ReadAloudButton';
+import { VOICELINES } from '../lib/voicelines';
 import { RecordControls } from '../components/RecordControls';
 import { useComplaintStore } from '../state/complaintStore';
 import { useFacilitySlug } from '../lib/facility';
@@ -41,7 +42,7 @@ export function NameScreen() {
       dots={{ step: 2, total: 4 }}
     >
       <div className="flex flex-col items-center gap-4">
-        <ReadAloudButton text={QUESTION} autoPlay halo />
+        <ReadAloudButton text={QUESTION} audioSrc={VOICELINES.name} autoPlay halo />
         <h2 className="text-4xl font-extrabold text-gray-900">Dein Name?</h2>
       </div>
 

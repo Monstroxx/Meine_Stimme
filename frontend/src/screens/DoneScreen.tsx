@@ -3,6 +3,7 @@ import { Check, House } from 'lucide-react';
 import { BigButton } from '../components/BigButton';
 import { KioskFrame } from '../components/KioskFrame';
 import { ReadAloudButton } from '../components/ReadAloudButton';
+import { VOICELINES } from '../lib/voicelines';
 import { useComplaintStore } from '../state/complaintStore';
 import { useFacilitySlug } from '../lib/facility';
 
@@ -18,7 +19,7 @@ export function DoneScreen() {
 
   return (
     <KioskFrame
-      topRight={<ReadAloudButton text="Fertig! Danke für deine Nachricht." autoPlay />}
+      topRight={<ReadAloudButton text="Fertig! Danke für deine Nachricht." audioSrc={VOICELINES.done} autoPlay />}
       footer={
         <BigButton icon={<House size={28} strokeWidth={2.5} />} onClick={handleRestart}>
           Nochmal

@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Play } from 'lucide-react';
 import { BigButton } from '../components/BigButton';
 import { KioskFrame } from '../components/KioskFrame';
 import { ReadAloudButton } from '../components/ReadAloudButton';
+import { VOICELINES } from '../lib/voicelines';
 import { useFacilitySlug } from '../lib/facility';
 import { useComplaintStore } from '../state/complaintStore';
 import { submitComplaint } from '../lib/submitComplaint';
@@ -62,7 +63,7 @@ export function ConfirmScreen() {
   return (
     <KioskFrame
       onHome={() => navigate(`/${facilitySlug}`)}
-      topRight={<ReadAloudButton text="Möchtest du deine Beschwerde abschicken?" autoPlay />}
+      topRight={<ReadAloudButton text="Möchtest du deine Beschwerde abschicken?" audioSrc={VOICELINES.confirm} autoPlay />}
       footer={
         <>
           {error && (
