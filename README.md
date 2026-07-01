@@ -312,9 +312,9 @@ npm run lint       # Linting (oxlint)
 
 Entwickelt im Rahmen der **Praktikumsersatzleistung HIT12 „AWE mit KI"** (Projektwoche 29.06.–03.07.2026).
 
-**Team:** [Monstroxx](https://github.com/Monstroxx) · TagerTi
+**Team:** [Monstroxx](https://github.com/Monstroxx) · [TagerTi](https://github.com/TagerTi)
 
-**Live-Demo:** https://meine-stimme-frontend-monstroxxs-projects.vercel.app/wohnform-01
+**Live-Demo:** [https://meine-stimme-frontend-monstroxxs-projects.vercel.app/wohnform-01](https://meine-stimme.jutio.org/wohnform-01)
 
 **KI-Einsatz:**
 - **Whisper** (OpenAI-Modell via Transformers.js) — Spracherkennung direkt im Browser
