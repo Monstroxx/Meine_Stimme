@@ -1,78 +1,31 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Lock, Play } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import {
+  deleteComplaint,
   fetchComplaint,
-  getAudioUrl,
   updateStatus,
   STATUS_META,
   STATUS_ORDER,
-  type AudioField,
   type Complaint,
   type ComplaintStatus,
   type StaffInfo,
 } from './adminApi';
+import { AdminAudioPlayer } from './AdminAudioPlayer';
 
 interface Props {
   staff: StaffInfo | null;
 }
 
-/** Holt erst bei Klick eine signierte URL und spielt das Audio ab. */
-function AudioButton({
-  complaintId,
-  field,
-  label,
-  disabled,
-}: {
-  complaintId: string;
-  field: AudioField;
-  label: string;
-  disabled: boolean;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const play = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const url = await getAudioUrl(complaintId, field);
-      await new Audio(url).play();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Fehler');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (disabled) {
-    return (
-      <span className="flex items-center gap-2 rounded-xl bg-gray-100 px-4 py-2 text-sm font-bold text-gray-400">
-        <Lock size={16} strokeWidth={2.5} /> {label} · Nur für Leitung
-      </span>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-1">
-      <button
-        onClick={play}
-        disabled={loading}
-        className="flex items-center gap-2 rounded-xl bg-[#fbe7c6] px-4 py-2 text-sm font-bold text-[#9a5a00] active:brightness-95 disabled:opacity-60"
-      >
-        <Play size={16} fill="currentColor" strokeWidth={0} /> {loading ? 'Lädt …' : label}
-      </button>
-      {error && <span className="text-xs font-semibold text-red-600">{error}</span>}
-    </div>
-  );
-}
-
 export function ComplaintDetail({ staff }: Props) {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -93,6 +46,19 @@ export function ComplaintDetail({ staff }: Props) {
       setError(e instanceof Error ? e.message : 'Status konnte nicht geändert werden');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      await deleteComplaint(id);
+      navigate('/admin');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Beschwerde konnte nicht gelöscht werden');
+      setDeleting(false);
     }
   };
 
@@ -127,7 +93,7 @@ export function ComplaintDetail({ staff }: Props) {
             </p>
             {complaint.problem_audio_path && (
               <div className="mt-3">
-                <AudioButton complaintId={complaint.id} field="problem" label="Problem anhören" disabled={audioLocked} />
+                <AdminAudioPlayer complaintId={complaint.id} field="problem" label="Problem anhören" disabled={audioLocked} />
               </div>
             )}
           </Section>
@@ -142,7 +108,7 @@ export function ComplaintDetail({ staff }: Props) {
             </p>
             {complaint.solution_audio_path && (
               <div className="mt-3">
-                <AudioButton complaintId={complaint.id} field="solution" label="Idee anhören" disabled={audioLocked} />
+                <AdminAudioPlayer complaintId={complaint.id} field="solution" label="Idee anhören" disabled={audioLocked} />
               </div>
             )}
           </Section>
@@ -157,7 +123,7 @@ export function ComplaintDetail({ staff }: Props) {
             )}
             {complaint.name_audio_path && (
               <div className="mt-3">
-                <AudioButton complaintId={complaint.id} field="name" label="Name anhören" disabled={audioLocked} />
+                <AdminAudioPlayer complaintId={complaint.id} field="name" label="Name anhören" disabled={audioLocked} />
               </div>
             )}
           </Section>
@@ -187,6 +153,39 @@ export function ComplaintDetail({ staff }: Props) {
                 );
               })}
             </div>
+          </Section>
+
+          <Section title="Beschwerde löschen">
+            {confirmDelete ? (
+              <div className="flex flex-col gap-3">
+                <p className="text-sm font-semibold text-gray-700">
+                  Diese Beschwerde und alle Aufnahmen werden endgültig gelöscht. Fortfahren?
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white active:brightness-95 disabled:opacity-60"
+                  >
+                    <Trash2 size={16} strokeWidth={2.5} /> {deleting ? 'Wird gelöscht …' : 'Endgültig löschen'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    disabled={deleting}
+                    className="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-600 disabled:opacity-60"
+                  >
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center gap-2 rounded-xl border-2 border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-600 active:bg-red-50"
+              >
+                <Trash2 size={16} strokeWidth={2.5} /> Beschwerde löschen
+              </button>
+            )}
           </Section>
         </div>
       )}

@@ -27,10 +27,10 @@ async function uploadAudio(facilitySlug: string, complaintId: string, label: str
   if (!audio) return null;
 
   const buffer = await readFile(audio.filepath);
-  const path = `${facilitySlug}/${complaintId}/${label}.webm`;
+  const path = `${facilitySlug}/${complaintId}/${label}.wav`;
   const { error } = await supabaseAdmin.storage
     .from(BUCKET)
-    .upload(path, buffer, { contentType: audio.mimetype ?? 'audio/webm' });
+    .upload(path, buffer, { contentType: audio.mimetype ?? 'audio/wav' });
 
   if (error) throw new Error(`Audio-Upload (${label}) fehlgeschlagen: ${error.message}`);
   return { path, buffer };
@@ -92,9 +92,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!recipient) throw new Error('COMPLAINT_RECIPIENT_EMAIL ist nicht konfiguriert');
 
     const attachments: { filename: string; content: Buffer }[] = [];
-    if (problemAudio) attachments.push({ filename: 'problem.webm', content: problemAudio.buffer });
-    if (solutionAudio) attachments.push({ filename: 'loesung.webm', content: solutionAudio.buffer });
-    if (nameAudio) attachments.push({ filename: 'name.webm', content: nameAudio.buffer });
+    if (problemAudio) attachments.push({ filename: 'problem.wav', content: problemAudio.buffer });
+    if (solutionAudio) attachments.push({ filename: 'loesung.wav', content: solutionAudio.buffer });
+    if (nameAudio) attachments.push({ filename: 'name.wav', content: nameAudio.buffer });
 
     // Ohne eigene verifizierte Domain nutzt der Prototyp den Resend-Sandbox-Sender
     // (sendet nur an die Account-Adresse). Spaeter via RESEND_FROM auf eigene Domain umstellen.

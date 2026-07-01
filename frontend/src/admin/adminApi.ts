@@ -66,6 +66,18 @@ export async function updateStatus(id: string, status: ComplaintStatus): Promise
   }
 }
 
+/** Beschwerde inkl. Audiodateien loeschen (nur Personal der eigenen Einrichtung). */
+export async function deleteComplaint(id: string): Promise<void> {
+  const res = await fetch(`/api/complaints/${id}`, {
+    method: 'DELETE',
+    headers: await authHeader(),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(body?.error ?? 'Beschwerde konnte nicht gelöscht werden');
+  }
+}
+
 /** Kurzlebige signierte URL fuer ein Audio; serverseitig inkl. Anonym-Sperre geprueft. */
 export async function getAudioUrl(complaintId: string, field: AudioField): Promise<string> {
   const params = new URLSearchParams({ complaintId, field });
