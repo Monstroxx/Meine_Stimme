@@ -82,7 +82,8 @@ export function AdminAudioPlayer({
     const arrayBuffer = await resp.arrayBuffer();
 
     // Blob-URL statt Remote-URL: gleiche Herkunft, keine CORS-Probleme bei der Wiedergabe.
-    const blob = new Blob([arrayBuffer], { type: 'audio/webm' });
+    const type = resp.headers.get('content-type') || 'audio/wav';
+    const blob = new Blob([arrayBuffer], { type });
     const objectUrl = URL.createObjectURL(blob);
     objectUrlRef.current = objectUrl;
 

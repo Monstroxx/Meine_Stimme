@@ -1,3 +1,5 @@
+import { blobToWav } from './audioConvert';
+
 interface ComplaintPayload {
   facilitySlug: string;
   isAnonymous: boolean;
@@ -22,9 +24,11 @@ export async function submitComplaint(p: ComplaintPayload): Promise<void> {
   if (p.solutionText) form.set('solution_text', p.solutionText);
   if (!p.isAnonymous && p.nameText) form.set('name_text', p.nameText);
 
-  if (p.problemBlob) form.set('problem_audio', p.problemBlob, 'problem.webm');
-  if (p.solutionBlob) form.set('solution_audio', p.solutionBlob, 'solution.webm');
-  if (!p.isAnonymous && p.nameBlob) form.set('name_audio', p.nameBlob, 'name.webm');
+  // In WAV umwandeln, damit die Audios auch in E-Mail-Programmen abspielbar sind (webm ist es oft nicht).
+  if (p.problemBlob) form.set('problem_audio', await blobToWav(p.problemBlob), 'problem.wav');
+  if (p.solutionBlob) form.set('solution_audio', await blobToWav(p.solutionBlob), 'solution.wav');
+  if (!p.isAnonymous && p.nameBlob)
+    form.set('name_audio', await blobToWav(p.nameBlob), 'name.wav');
 
   const res = await fetch('/api/complaints', { method: 'POST', body: form });
 
