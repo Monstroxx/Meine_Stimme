@@ -119,6 +119,9 @@ export function AdminAudioPlayer({
       registerPlayback(audio); // stoppt jeden anderen laufenden Player
       await audio.play();
     } catch (e) {
+      // Wird ein anderes Audio gestartet, pausiert registerPlayback dieses hier – das laufende
+      // play() bricht dann mit AbortError ab. Das ist gewolltes Verhalten, kein Fehler.
+      if (e instanceof DOMException && e.name === 'AbortError') return;
       setError(e instanceof Error ? e.message : 'Audio konnte nicht geladen werden');
     } finally {
       setLoading(false);
