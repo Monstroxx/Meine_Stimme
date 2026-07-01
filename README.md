@@ -314,7 +314,7 @@ Entwickelt im Rahmen der **Praktikumsersatzleistung HIT12 „AWE mit KI"** (Proj
 
 **Team:** [Monstroxx](https://github.com/Monstroxx) · [TagerTi](https://github.com/TagerTi)
 
-**Live-Demo:** [https://meine-stimme-frontend-monstroxxs-projects.vercel.app/wohnform-01](https://meine-stimme.jutio.org/wohnform-01)
+**Live-Demo:** https://meine-stimme.jutio.org/wohnform-01
 
 **KI-Einsatz:**
 - **Whisper** (OpenAI-Modell via Transformers.js) — Spracherkennung direkt im Browser
