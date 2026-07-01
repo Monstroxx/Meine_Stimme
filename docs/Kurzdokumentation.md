@@ -72,7 +72,7 @@ Start ─▶ Problem ─▶ Lösung ─▶ Name ─▶ Bestätigen ─▶ Fertig
                                    Verwaltung: Login ─▶ Liste ─▶ Detail (Status + Audio)
 ```
 
-![Übersicht der Screens](ui_konzept/0_uebersicht.png)
+![Übersicht aller Screens](ui/overview_all.png)
 
 **Architektur / Datenfluss:**
 
@@ -218,17 +218,19 @@ Audio-Wiedergabe.
 
 ## 9. Screenshots der Oberfläche
 
+Die folgenden Screenshots zeigen die fertige, live deployte Anwendung.
+
 | Start | Problem | Lösung |
 | :---: | :---: | :---: |
-| ![Start](ui_konzept/1_start.png) | ![Problem](ui_konzept/2_problem.png) | ![Lösung](ui_konzept/3_loesung.png) |
+| ![Start](ui/1_start.png) | ![Problem](ui/2_problem.png) | ![Lösung](ui/3_loesung.png) |
 
 | Name | Bestätigen | Fertig |
 | :---: | :---: | :---: |
-| ![Name](ui_konzept/4_name.png) | ![Senden](ui_konzept/5_senden.png) | ![Fertig](ui_konzept/6_fertig.png) |
+| ![Name](ui/4_name.png) | ![Senden](ui/5_senden.png) | ![Fertig](ui/6_fertig.png) |
 
 | Verwaltungs-Ansicht |
 | :---: |
-| ![Verwaltung](ui_konzept/7_verwaltung.png) |
+| ![Verwaltung](ui/7_verwaltung.png) |
 
 ## 10. Sicherheitsaspekte & Datenschutz
 
