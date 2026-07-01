@@ -2,20 +2,15 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { supabaseAdmin } from '../_lib/supabaseAdmin.js';
 
 const ALLOWED_STATUSES = ['offen', 'in_bearbeitung', 'erledigt'];
+const BUCKET = 'complaint-audio';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'PATCH') {
+  if (req.method !== 'PATCH' && req.method !== 'DELETE') {
     res.status(405).json({ ok: false, error: 'Method not allowed' });
     return;
   }
 
   const id = req.query.id as string;
-  const status = (req.body as { status?: string } | undefined)?.status;
-
-  if (!status || !ALLOWED_STATUSES.includes(status)) {
-    res.status(400).json({ ok: false, error: 'Ungueltiger Status' });
-    return;
-  }
 
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) {
@@ -42,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { data: complaint } = await supabaseAdmin
     .from('complaints')
-    .select('facility_slug')
+    .select('facility_slug, problem_audio_path, solution_audio_path, name_audio_path')
     .eq('id', id)
     .single();
 
@@ -57,8 +52,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const { error: updateError } = await supabaseAdmin.from('complaints').update({ status }).eq('id', id);
+  if (req.method === 'DELETE') {
+    // Zuerst die Audiodateien aus dem privaten Bucket entfernen, dann die Datenbank-Zeile.
+    const paths = [
+      complaint.problem_audio_path,
+      complaint.solution_audio_path,
+      complaint.name_audio_path,
+    ].filter((p): p is string => !!p);
 
+    if (paths.length > 0) {
+      await supabaseAdmin.storage.from(BUCKET).remove(paths);
+    }
+
+    const { error: deleteError } = await supabaseAdmin.from('complaints').delete().eq('id', id);
+    if (deleteError) {
+      res.status(500).json({ ok: false, error: 'Beschwerde konnte nicht geloescht werden' });
+      return;
+    }
+
+    res.status(200).json({ ok: true });
+    return;
+  }
+
+  // PATCH: Status aendern
+  const status = (req.body as { status?: string } | undefined)?.status;
+  if (!status || !ALLOWED_STATUSES.includes(status)) {
+    res.status(400).json({ ok: false, error: 'Ungueltiger Status' });
+    return;
+  }
+
+  const { error: updateError } = await supabaseAdmin.from('complaints').update({ status }).eq('id', id);
   if (updateError) {
     res.status(500).json({ ok: false, error: 'Status konnte nicht aktualisiert werden' });
     return;
