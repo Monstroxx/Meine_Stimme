@@ -71,7 +71,7 @@ richten kann.
 | **Routing** | React Router v7 (`/:facilitySlug/*`) |
 | **Icons** | lucide-react |
 | **KI — Spracherkennung** | Whisper (`Xenova/whisper-base`) via Transformers.js — läuft lokal im Browser |
-| **Audioaufnahme** | MediaRecorder-API (WebM/Opus) |
+| **Audioaufnahme** | MediaRecorder-API (WebM/Opus), vor Versand nach WAV konvertiert (in Mail-Programmen abspielbar) |
 | **Vorlesen** | Web Speech API (`SpeechSynthesis`, de-DE) + vorproduzierte WAV-Voicelines |
 | **Backend** | Vercel Serverless Functions (Node.js, ESM) |
 | **Datenbank + Auth** | Supabase (PostgreSQL + Row-Level-Security, Region Frankfurt) |
@@ -87,11 +87,11 @@ richten kann.
 Bewohner-Tablet  (Kiosk-Browser, Einrichtungs-Slug in der Start-URL)
    │
    │  Vorlesen (WAV-Voicelines + SpeechSynthesis-Fallback)
-   │  Aufnahme (MediaRecorder → WebM/Opus-Blob)
+   │  Aufnahme (MediaRecorder → WebM/Opus), vor Versand nach WAV konvertiert
    │  KI: Whisper im Browser  →  transkribierter Text
    ▼
 Vercel Serverless Function  POST /api/complaints
-   ├──▶ Supabase Storage     complaint-audio/{slug}/{id}/problem.webm …
+   ├──▶ Supabase Storage     complaint-audio/{slug}/{id}/problem.wav …
    ├──▶ Supabase PostgreSQL  INSERT INTO complaints …
    └──▶ Resend               E-Mail mit Text + Audio-Anhang an zentrale Adresse
 
@@ -294,6 +294,16 @@ Kiosk-Start-URL: `https://<projekt>.vercel.app/wohnform-01`
 
 **Löschkonzept:** Beschwerden und Audiodateien werden nach Abschluss für max. 12 Monate aufbewahrt,
 anonyme Aufnahmen direkt nach Bearbeitung. (Im Prototyp als Konzept; kein automatisierter Löschjob.)
+
+**Bekannte Schwachstellen (`npm audit`):** 14 Befunde (1 kritisch, 9 hoch, 4 moderat), alle
+**transitiv** über Entwicklungs-/Build-Abhängigkeiten — die Vercel-Build-Tools (`@vercel/node` →
+`ajv`, `undici`, `path-to-regexp`, `minimatch` …) und die KI-Laufzeit (`@xenova/transformers` →
+`onnxruntime-web` → `protobufjs`). Kein eigener Anwendungscode ist betroffen; verfügbare Fixes
+erfordern Breaking Changes (`@vercel/node@4`) bzw. sind für die Transformers-Kette (noch) nicht
+verfügbar. Für den Prototyp bewusst akzeptiert: Die KI lädt nur ein festes, vertrauenswürdiges
+Modell (kein Angreifer-Input in den Proto-Parser), und die Vercel-Tools laufen nur im Build, nicht
+im Auslieferungspfad. Produktiv würde man `@vercel/node` aktualisieren und die Transformers-Version
+nachziehen.
 
 ---
 

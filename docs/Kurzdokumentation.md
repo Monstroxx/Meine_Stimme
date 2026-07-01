@@ -95,7 +95,7 @@ Backend (Vercel Serverless Function, kennt zentralen Empfänger)
 | Sprache | **TypeScript** | Typsicherheit über Frontend und Backend hinweg |
 | Oberfläche | **React + Vite**, **Tailwind CSS v4** | schnelle Entwicklung, React-Router liefert die „Ebenen" |
 | Icons | **lucide-react** | echte, klare Symbole statt Emojis |
-| Audioaufnahme | **MediaRecorder-API** (`getUserMedia`) | erzeugt die WebM/Opus-Datei für den Mail-Anhang |
+| Audioaufnahme | **MediaRecorder-API** (`getUserMedia`) | nimmt WebM/Opus auf; wird vor Versand nach **WAV** konvertiert (in E-Mail-Programmen abspielbar) |
 | **KI: Spracherkennung** | **Whisper (`Xenova/whisper-base`) via Transformers.js** | wandelt Sprache → Text, läuft lokal im Browser (datenschutzfreundlich, ohne externen Dienst) |
 | Vorlesen | **Web Speech API** (`SpeechSynthesis`, de-DE) | liest jede Frage automatisch vor |
 | Status-Verwaltung | **Zustand** | leichtgewichtiger Store über die 6 Screens |
@@ -210,9 +210,10 @@ create policy "staff sieht beschwerden der eigenen einrichtung"
 Fragen · 3) eigene Antwort anhören · 4) Anonym-Umschalter · 5) KI-Transkription mit
 Korrektur · 6) Tastatur-Eingabe · 7) Absenden.
 
-**Zusatzfunktionen:** Audio-Anhang an die E-Mail · Verwaltungs-Ansicht mit Login,
-Status-Verwaltung (offen / in Bearbeitung / erledigt) und rollenbasierter
-Audio-Wiedergabe.
+**Zusatzfunktionen:** Audio-Anhang an die E-Mail (als WAV) · Verwaltungs-Ansicht mit Login,
+Status-Verwaltung (offen / in Bearbeitung / erledigt), rollenbasierter Audio-Wiedergabe mit
+**Wellenform-Player** (Play/Pause, Fortschritt, Klick-zum-Spulen; es spielt immer nur das zuletzt
+geöffnete Audio) und **Löschen** von Beschwerden inkl. der Audiodateien.
 
 **Mehrere Ebenen:** Start → Problem → Lösung → Name → Bestätigen → Fertig + Verwaltung.
 
@@ -249,8 +250,19 @@ Die folgenden Screenshots zeigen die fertige, live deployte Anwendung.
 
 **Löschkonzept (Festlegung):** Beschwerden und Audiodateien werden nach Abschluss der
 Bearbeitung für maximal **12 Monate** aufbewahrt und danach gelöscht; anonyme
-Aufnahmen werden direkt nach Bearbeitung gelöscht. (Im Prototyp als Konzept
-festgehalten, kein automatisierter Löschjob.)
+Aufnahmen werden direkt nach Bearbeitung gelöscht. In der Verwaltung können Beschwerden
+zusätzlich **manuell gelöscht** werden (inkl. der Audiodateien im Storage). Ein
+automatisierter Löschjob ist im Prototyp als Konzept festgehalten.
+
+**Bekannte Schwachstellen (`npm audit`):** Der Audit meldet 14 Befunde (1 kritisch, 9 hoch,
+4 moderat) — **alle transitiv** über Entwicklungs-/Build-Abhängigkeiten: die Vercel-Build-Tools
+(`@vercel/node` → `ajv`, `undici`, `path-to-regexp`, `minimatch` …) und die KI-Laufzeit
+(`@xenova/transformers` → `onnxruntime-web` → `protobufjs`). Kein eigener Anwendungscode ist
+betroffen. Die verfügbaren Fixes erfordern Breaking Changes (`@vercel/node@4`) bzw. sind für die
+Transformers-Kette nicht verfügbar. Für den Prototyp bewusst **akzeptiert**, weil die KI nur ein
+festes, vertrauenswürdiges Modell lädt (kein Angreifer-Input in den Proto-Parser) und die
+Vercel-Tools ausschließlich im Build laufen, nicht im Auslieferungspfad. Für einen Produktivbetrieb
+würde man `@vercel/node` aktualisieren und die Transformers-Version nachziehen.
 
 ## 11. Herausforderungen & Lösungswege
 
@@ -268,8 +280,11 @@ festgehalten, kein automatisierter Löschjob.)
   funktionierte die Anmeldung. **Lehre:** Personal-Accounts über das Supabase-Studio
   bzw. die Admin-API anlegen, nicht per reinem SQL-Insert.
 - **E-Mail-Versand zeitweise geblockt** (Empfänger-Server stufte die geteilte
-  Resend-IP über eine Blacklist ein). → Für den Prototyp toleranteren Empfänger nutzen;
-  für den Produktivbetrieb eigene verifizierte Absender-Domain einrichten.
+  Resend-IP über eine Blacklist ein). → Eigene Absender-Domain (`meinestimme.jutio.org`)
+  verifiziert, wodurch die Zustellung zuverlässig wurde.
+- **Audio nicht in Mail-Programmen abspielbar.** MediaRecorder liefert WebM/Opus, das viele
+  E-Mail-Clients nicht abspielen. → Die Aufnahme wird vor dem Versand im Browser per Web Audio API
+  nach **WAV** (16-bit PCM, mono) konvertiert — ohne externe Bibliothek, universell abspielbar.
 
 ## 12. Teamarbeit
 

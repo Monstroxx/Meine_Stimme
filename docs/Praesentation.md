@@ -118,9 +118,11 @@ echte Symbole, Vorlesefunktion. Vorbild für die Bedienung ist das barrierefreie
 
 **Zusatzfunktionen (ZP):**
 
-- **Audio-Anhang** an die E-Mail
+- **Audio-Anhang** an die E-Mail (als WAV, damit überall abspielbar)
 - **Login & rollenbasierter Zugriff** (Leitung / Betreuer)
 - **Status-Verwaltung** (offen / in Bearbeitung / erledigt)
+- **Wellenform-Player** in der Verwaltung (Play/Pause, Fortschritt, Klick-zum-Spulen; nur das zuletzt geöffnete Audio spielt)
+- **Löschen** von Beschwerden inkl. der Audiodateien
 - **Hintergrund-Transkription** — durchklicken ohne Warten (siehe [Snippet 3](#83-hintergrund-transkription--durchklicken-ohne-warten))
 
 ---
@@ -149,11 +151,11 @@ Der **KI-Kern** der App ist **Whisper** (OpenAI). Wir nutzen die browserlauffäh
 ```
 Bewohner-Tablet  (Kiosk-Browser, Einrichtungs-Slug in der Start-URL)
    │  Vorlesen (WAV-Voicelines + SpeechSynthesis-Fallback)
-   │  Aufnahme (MediaRecorder → WebM/Opus-Blob)
+   │  Aufnahme (MediaRecorder → WebM/Opus), vor Versand nach WAV konvertiert
    │  KI: Whisper im Browser  →  transkribierter Text
    ▼
 Vercel Serverless Function   POST /api/complaints
-   ├──▶ Supabase Storage      complaint-audio/{slug}/{id}/problem.webm …
+   ├──▶ Supabase Storage      complaint-audio/{slug}/{id}/problem.wav …
    ├──▶ Supabase PostgreSQL   INSERT INTO complaints …
    └──▶ Resend                E-Mail mit Text + Audio-Anhang an zentrale Adresse
                                    │
@@ -267,7 +269,10 @@ create policy "staff aendert status der eigenen einrichtung"
   öffentlichen Schlüssel abgreift, kann er damit **keine** Beschwerden auslesen.
 - Angemeldetes **Personal** sieht ausschließlich die Beschwerden **seiner** Einrichtung; die Leitung
   (Slug `null`) sieht alles.
-- Es gibt **keine** Delete-Policy → über die App kann niemand Beschwerden löschen.
+- Es gibt **keine** Delete-Policy für `anon`/`authenticated` → weder das Tablet noch der
+  Browser-Client können löschen. Das **manuelle Löschen** in der Verwaltung läuft bewusst
+  ausschließlich serverseitig über den geschützten API-Endpunkt (Service-Role, nach Auth- und
+  Einrichtungs-Prüfung).
 
 ### 7.4 Audio-Speicher — privater Bucket, nur über den Server
 
@@ -455,8 +460,16 @@ const { data } = await supabaseAdmin.storage.from(BUCKET).createSignedUrl(path, 
 | **EU-Hosting** | Supabase Frankfurt, EU-Mailanbieter Resend |
 
 **Löschkonzept (Festlegung):** Beschwerden und Audiodateien werden nach Abschluss der Bearbeitung für
-maximal **12 Monate** aufbewahrt, anonyme Aufnahmen direkt nach der Bearbeitung gelöscht. Im Prototyp
-als Konzept festgehalten (kein automatisierter Löschjob).
+maximal **12 Monate** aufbewahrt, anonyme Aufnahmen direkt nach der Bearbeitung gelöscht. In der
+Verwaltung können Beschwerden zusätzlich **manuell gelöscht** werden (inkl. Audiodateien). Ein
+automatisierter Löschjob ist im Prototyp als Konzept festgehalten.
+
+**Bekannte Schwachstellen (`npm audit`):** 14 Befunde (1 kritisch, 9 hoch, 4 moderat), **alle
+transitiv** über Entwicklungs-/Build-Abhängigkeiten — die Vercel-Build-Tools (`@vercel/node`) und
+die KI-Laufzeit (`@xenova/transformers` → `onnxruntime-web` → `protobufjs`). Kein eigener Code ist
+betroffen; Fixes erfordern Breaking Changes bzw. sind für die Transformers-Kette nicht verfügbar.
+Bewusst akzeptiert (die KI lädt nur ein festes, vertrauenswürdiges Modell; die Build-Tools laufen
+nicht im Auslieferungspfad) und für den Produktivbetrieb als Update-Aufgabe notiert.
 
 ---
 
@@ -467,7 +480,7 @@ als Konzept festgehalten (kein automatisierter Löschjob).
 | Sprache | **TypeScript** | Typsicherheit über Frontend und Backend hinweg |
 | Oberfläche | **React + Vite**, **Tailwind CSS v4** | schnelle Entwicklung, React-Router liefert die „Ebenen“ |
 | Icons | **lucide-react** | echte, klare Symbole statt Emojis |
-| Audioaufnahme | **MediaRecorder-API** | erzeugt die WebM/Opus-Datei für den Mail-Anhang |
+| Audioaufnahme | **MediaRecorder-API** | nimmt WebM/Opus auf; vor Versand nach **WAV** konvertiert (überall abspielbar) |
 | **KI: Spracherkennung** | **Whisper (`Xenova/whisper-base`) via Transformers.js** | Sprache → Text, **lokal** im Browser |
 | Vorlesen | **Web Speech API** + WAV-Voicelines | liest jede Frage automatisch vor |
 | Status-Verwaltung | **Zustand** | leichtgewichtiger Store über die 6 Screens |
@@ -505,7 +518,8 @@ Git-Repository mit nachvollziehbarer Commit-Historie.
 | **Aufnahme + Erkennung gleichzeitig** ist unzuverlässig | Erst mit MediaRecorder aufnehmen, **danach** transkribieren. |
 | **Datenbank nur über IPv6** erreichbar | Schema-Migration über den Supabase-MCP-Server ausgeführt. |
 | **Login trotz korrektem Passwort** abgelehnt (`invalid_credentials`) | Ursache: fehlende `instance_id` beim per SQL angelegten Auth-Nutzer. **Lehre:** Accounts über Supabase-Studio / Admin-API anlegen, nicht per rohem SQL-Insert. |
-| **E-Mail-Versand zeitweise geblockt** (Empfänger stufte die geteilte Resend-IP über eine Blacklist ein) | Für die Demo toleranteren Empfänger nutzen; produktiv eigene verifizierte Absender-Domain. |
+| **E-Mail-Versand zeitweise geblockt** (Empfänger stufte die geteilte Resend-IP über eine Blacklist ein) | Eigene Absender-Domain `meinestimme.jutio.org` verifiziert → zuverlässige Zustellung. |
+| **Audio nicht in Mail-Programmen abspielbar** (WebM/Opus) | Aufnahme vor Versand im Browser per Web Audio API nach **WAV** (16-bit PCM, mono) konvertiert — ohne externe Bibliothek. |
 | **Wartezeit auf die KI** störte den Flow | **Hintergrund-Transkription** mit Token-System + `awaitTranscriptions()` beim Senden ([8.3](#83-hintergrund-transkription--durchklicken-ohne-warten)). |
 
 ---
